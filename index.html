@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#080b10" />
+  <title>Velo // Ride mode</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+    :root {
+      --ink: #f4f7f2;
+      --muted: #82909d;
+      --panel: #11161d;
+      --panel-hi: #18212a;
+      --line: rgba(150, 171, 185, .17);
+      --acid: #baff35;
+      --cyan: #60e5e1;
+      --orange: #ff7957;
+      --safe: #72f2bb;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #080b10; color: var(--ink); }
+    body { font-family: 'Space Grotesk', sans-serif; padding: 18px; }
+    button, select { font: inherit; color: inherit; }
+    button { border: 0; cursor: pointer; }
+
+    .app-shell { max-width: 1180px; margin: 0 auto; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-mark { width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid var(--acid); color: var(--acid); border-radius: 9px; font-weight: 700; transform: rotate(45deg); }
+    .brand-mark span { transform: rotate(-45deg); }
+    .brand-name { font-size: 16px; letter-spacing: .15em; font-weight: 700; }
+    .ride-state { display: flex; align-items: center; gap: 8px; color: var(--muted); font: 12px 'DM Mono', monospace; text-transform: uppercase; }
+    .state-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--acid); box-shadow: 0 0 14px var(--acid); }
+
+    .dashboard { display: grid; grid-template-columns: 1.13fr .87fr; gap: 14px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; box-shadow: 0 18px 60px rgba(0,0,0,.18); }
+    .card-head { display: flex; justify-content: space-between; align-items: center; padding: 15px 17px; border-bottom: 1px solid var(--line); }
+    .eyebrow { color: var(--muted); font: 11px 'DM Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }
+    .pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); font: 11px 'DM Mono', monospace; }
+    .pill strong { color: var(--acid); font-weight: 500; }
+
+    .map-card { min-height: 430px; background: #0f151b; }
+    .map { position: relative; min-height: 372px; overflow: hidden; background-color: #121a20; background-image: linear-gradient(30deg, transparent 47%, rgba(96,229,225,.13) 48%, transparent 49%), linear-gradient(150deg, transparent 47%, rgba(186,255,53,.08) 48%, transparent 49%), linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px); background-size: 118px 118px, 154px 154px, 36px 36px, 36px 36px; }
+    .map:before { content: ''; position: absolute; inset: 14% -14% 20% 22%; border: 3px solid var(--acid); border-left-color: transparent; border-radius: 48% 65% 35% 56%; transform: rotate(-24deg); box-shadow: 0 0 18px rgba(186,255,53,.65), 0 0 48px rgba(186,255,53,.22); }
+    .map:after { content: ''; position: absolute; width: 13px; height: 13px; left: 49%; top: 51%; border: 3px solid var(--ink); background: var(--orange); border-radius: 50%; box-shadow: 0 0 0 6px rgba(255,121,87,.22), 0 0 30px var(--orange); }
+    .map-label { position: absolute; color: rgba(244,247,242,.48); font: 10px 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .08em; }
+    .map-label.one { left: 13%; top: 28%; } .map-label.two { right: 14%; top: 64%; } .map-label.three { left: 61%; top: 22%; }
+    .map-controls { position: absolute; right: 14px; bottom: 15px; display: grid; gap: 8px; }
+    .icon-btn { width: 40px; height: 40px; border: 1px solid var(--line); background: rgba(10,15,19,.8); border-radius: 12px; color: var(--ink); font-size: 19px; }
+    .icon-btn:hover { border-color: var(--acid); color: var(--acid); }
+    .turn { position: absolute; left: 14px; right: 14px; top: 14px; display: flex; align-items: center; gap: 13px; padding: 13px; background: rgba(9,13,17,.88); border: 1px solid rgba(186,255,53,.23); border-radius: 15px; backdrop-filter: blur(10px); }
+    .turn-arrow { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--acid); color: #0b100b; font-size: 22px; font-weight: 700; }
+    .turn-copy b { display: block; font-size: 15px; } .turn-copy small { display: block; margin-top: 3px; color: var(--acid); font: 12px 'DM Mono', monospace; }
+
+    .camera-card { position: relative; min-height: 275px; background: #0e1318; }
+    .camera-wrap { position: relative; min-height: 275px; background: radial-gradient(circle at 50% 110%, #344c41 0, #18291f 28%, #101a1c 60%, #090d11 100%); }
+    video { display: block; width: 100%; height: 275px; object-fit: cover; opacity: 0; transition: opacity .25s ease; transform: scaleX(-1); }
+    video.active { opacity: .92; }
+    .camera-placeholder { position: absolute; inset: 0; display: grid; place-items: center; padding: 34px; text-align: center; color: var(--muted); }
+    .camera-placeholder strong { display: block; color: var(--ink); font-size: 18px; margin-bottom: 7px; }
+    .camera-placeholder p { margin: 0; max-width: 250px; font-size: 13px; line-height: 1.45; }
+    .camera-wrap.live .camera-placeholder { display: none; }
+    .camera-top { position: absolute; z-index: 2; top: 14px; left: 15px; right: 15px; display: flex; justify-content: space-between; align-items: center; }
+    .camera-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; letter-spacing: .04em; }
+    .eye { color: var(--acid); } .rec { color: var(--orange); font: 11px 'DM Mono', monospace; }
+    .alert { position: absolute; z-index: 2; bottom: 14px; left: 14px; right: 14px; display: flex; align-items: center; gap: 9px; padding: 11px 13px; background: rgba(255,121,87,.92); color: #190b08; border-radius: 12px; font-size: 12px; font-weight: 700; }
+
+    .metrics { grid-column: 1 / -1; display: grid; grid-template-columns: 1.2fr .8fr .8fr .8fr; gap: 10px; }
+    .metric { min-height: 108px; padding: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 17px; }
+    .metric .label { color: var(--muted); font: 11px 'DM Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .metric .value { margin-top: 13px; font-weight: 700; font-size: 27px; line-height: 1; } .metric .unit { color: var(--muted); font-size: 12px; font-weight: 500; }
+    .metric.primary { grid-row: span 2; background: linear-gradient(145deg, #152019, #11161d 60%); } .metric.primary .value { color: var(--acid); font-size: clamp(48px, 7vw, 74px); letter-spacing: -.08em; } .metric.primary .unit { font-size: 16px; }
+    .bottom-row { grid-column: 1 / -1; display: flex; gap: 10px; }
+    .bottom-row > * { flex: 1; }
+    .action { min-height: 56px; border-radius: 15px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; } .action.pause { background: #202a33; } .action.stop { background: var(--orange); color: #190b08; } .action:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .tools { display: flex; gap: 8px; } select { min-width: 0; flex: 1; background: var(--panel-hi); border: 1px solid var(--line); border-radius: 12px; padding: 10px; color: var(--muted); font-size: 12px; }
+    .status { min-height: 22px; color: var(--muted); font: 11px 'DM Mono', monospace; }
+    .status.good { color: var(--safe); } .status.warn { color: var(--orange); }
+
+    @media (max-width: 760px) { body { padding: 11px; } .topbar { margin-bottom: 11px; } .dashboard { grid-template-columns: 1fr; } .map-card { min-height: 360px; } .map { min-height: 302px; } .camera-card, .camera-wrap, video { min-height: 250px; height: 250px; } .metrics { grid-template-columns: 1fr 1fr; } .metric.primary { grid-column: 1 / -1; grid-row: auto; min-height: 146px; } .bottom-row { grid-column: 1 / -1; } }
+    @media (min-width: 761px) { .camera-card { grid-column: 2; grid-row: 1; } .map-card { grid-column: 1; grid-row: 1; } }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark"><span>+</span></div><div class="brand-name">VELO / RIDE</div></div>
+      <div class="ride-state"><span class="state-dot"></span><span id="rideState">READY TO RIDE</span></div>
+    </header>
+
+    <section class="dashboard" aria-label="Cycling ride dashboard">
+      <article class="card map-card">
+        <div class="card-head"><span class="eyebrow">01 / route guidance</span><span class="pill"><strong id="gpsPill">DEMO GPS</strong></span></div>
+        <div class="map" aria-label="Illustrated route map">
+          <div class="turn"><div class="turn-arrow">↗</div><div class="turn-copy"><b>Turn right on Oak St</b><small>in 200 meters</small></div></div>
+          <span class="map-label one">Riverside way</span><span class="map-label two">Oak street</span><span class="map-label three">North loop</span>
+          <div class="map-controls"><button class="icon-btn" id="locateBtn" aria-label="Use current location">⌖</button><button class="icon-btn" aria-label="Zoom in">+</button></div>
+        </div>
+      </article>
+
+      <article class="card camera-card">
+        <div class="camera-wrap" id="cameraWrap">
+          <video id="camera" playsinline muted></video>
+          <div class="camera-placeholder"><div><strong>Rear view offline</strong><p>Connect a camera or start the iPhone rear camera to monitor what's behind you.</p></div></div>
+          <div class="camera-top"><div class="camera-title"><span class="eye">◉</span> BEHIND YOU</div><div class="rec" id="cameraState">○ READY</div></div>
+          <div class="alert" id="alertBar">△ &nbsp; CAMERA PREVIEW READY</div>
+        </div>
+        <div class="card-head"><div class="tools"><select id="cameraSelect" aria-label="Camera source"><option>Choose camera source</option></select><button class="icon-btn" id="cameraBtn" style="width:auto;padding:0 13px;font-size:12px">START</button></div></div>
+      </article>
+
+      <section class="metrics" aria-label="Ride metrics">
+        <div class="metric primary"><div class="label">Current speed</div><div class="value"><span id="speed">0.0</span> <span class="unit">km/h</span></div><div class="status" id="gpsStatus">Demo mode · press locate for GPS</div></div>
+        <div class="metric"><div class="label">Distance</div><div class="value"><span id="distance">0.00</span> <span class="unit">km</span></div></div>
+        <div class="metric"><div class="label">Avg speed</div><div class="value"><span id="avgSpeed">0.0</span> <span class="unit">km/h</span></div></div>
+        <div class="metric"><div class="label">Duration</div><div class="value"><span id="duration">00:00</span> <span class="unit">min</span></div></div>
+        <div class="metric"><div class="label">Elevation</div><div class="value">+<span id="elevation">0</span> <span class="unit">m</span></div></div>
+      </section>
+
+      <div class="bottom-row"><button class="action pause" id="pauseBtn">Ⅱ &nbsp; PAUSE RIDE</button><button class="action stop" id="stopBtn">□ &nbsp; STOP RIDE</button></div>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const state = { startedAt: Date.now(), paused: false, lastPosition: null, lastTimestamp: null, distance: 0, samples: 0, speedTotal: 0, watchId: null, stream: null };
+
+    function setStatus(text, type = '') { $('gpsStatus').textContent = text; $('gpsStatus').className = `status ${type}`; }
+    function formatDuration(ms) { const s = Math.max(0, Math.floor(ms / 1000)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; }
+    function haversine(a, b) { const r = 6371; const dLat = (b.latitude - a.latitude) * Math.PI / 180; const dLon = (b.longitude - a.longitude) * Math.PI / 180; const x = Math.sin(dLat / 2) ** 2 + Math.cos(a.latitude * Math.PI / 180) * Math.cos(b.latitude * Math.PI / 180) * Math.sin(dLon / 2) ** 2; return r * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)); }
+    function updatePosition(position) { const c = position.coords; const current = { latitude: c.latitude, longitude: c.longitude }; const segmentKm = state.lastPosition ? haversine(state.lastPosition, current) : 0; const timestamp = position.timestamp || Date.now(); const seconds = state.lastTimestamp ? (timestamp - state.lastTimestamp) / 1000 : 0; if (state.lastPosition) state.distance += segmentKm; state.lastPosition = current; state.lastTimestamp = timestamp; const measuredKmh = seconds > 0 ? (segmentKm / seconds) * 3600 : 0; const kmh = Number.isFinite(c.speed) && c.speed >= 0 ? c.speed * 3.6 : measuredKmh; state.samples += 1; state.speedTotal += kmh; $('speed').textContent = kmh.toFixed(1); $('avgSpeed').textContent = (state.speedTotal / state.samples).toFixed(1); $('distance').textContent = state.distance.toFixed(2); $('gpsPill').textContent = 'LIVE GPS'; $('gpsStatus').textContent = `Live location · accuracy ${Math.round(c.accuracy || 0)}m`; $('gpsStatus').className = 'status good'; }
+    function startGps() { if (!navigator.geolocation) { setStatus('GPS unavailable · demo mode active', 'warn'); return; } setStatus('Requesting location permission…'); state.watchId = navigator.geolocation.watchPosition(updatePosition, () => { $('gpsPill').textContent = 'DEMO GPS'; setStatus('Location unavailable · demo mode active', 'warn'); }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 }); $('rideState').textContent = 'GPS CONNECTING'; }
+    function stopGps() { if (state.watchId !== null) navigator.geolocation.clearWatch(state.watchId); state.watchId = null; }
+    async function listCameras() { if (!navigator.mediaDevices?.enumerateDevices) return; const devices = await navigator.mediaDevices.enumerateDevices(); const cameras = devices.filter(d => d.kind === 'videoinput'); $('cameraSelect').innerHTML = cameras.length ? cameras.map((d, i) => `<option value="${d.deviceId}">${d.label || `Camera ${i + 1}`}</option>`).join('') : '<option>No camera detected</option>'; }
+    async function toggleCamera() { if (state.stream) { state.stream.getTracks().forEach(t => t.stop()); state.stream = null; $('camera').classList.remove('active'); $('cameraWrap').classList.remove('live'); $('cameraBtn').textContent = 'START'; $('cameraState').textContent = '○ READY'; $('alertBar').textContent = '△  CAMERA PREVIEW READY'; return; } if (!navigator.mediaDevices?.getUserMedia) { $('cameraState').textContent = '× UNAVAILABLE'; $('alertBar').textContent = '△  CAMERA API UNAVAILABLE · DEMO MODE'; return; } try { const deviceId = $('cameraSelect').value; const constraints = deviceId && deviceId !== 'Choose camera source' && deviceId !== 'No camera detected' ? { video: { deviceId: { exact: deviceId } }, audio: false } : { video: { facingMode: { ideal: 'environment' } }, audio: false }; state.stream = await navigator.mediaDevices.getUserMedia(constraints); $('camera').srcObject = state.stream; await $('camera').play(); $('camera').classList.add('active'); $('cameraWrap').classList.add('live'); $('cameraBtn').textContent = 'STOP'; $('cameraState').textContent = '● LIVE'; $('alertBar').textContent = '●  REAR CAMERA LIVE'; await listCameras(); } catch (error) { $('cameraState').textContent = '× DENIED'; $('alertBar').textContent = '△  CAMERA OFF · DEMO MODE ACTIVE'; } }
+    $('cameraBtn').addEventListener('click', toggleCamera); $('cameraSelect').addEventListener('change', () => { if (state.stream) { toggleCamera().then(toggleCamera); } }); $('locateBtn').addEventListener('click', startGps);
+    $('pauseBtn').addEventListener('click', () => { state.paused = !state.paused; $('pauseBtn').innerHTML = state.paused ? '▶ &nbsp; RESUME RIDE' : 'Ⅱ &nbsp; PAUSE RIDE'; $('rideState').textContent = state.paused ? 'RIDE PAUSED' : 'RIDE IN PROGRESS'; });
+    $('stopBtn').addEventListener('click', () => { state.paused = true; stopGps(); if (state.stream) toggleCamera(); $('rideState').textContent = 'RIDE COMPLETE'; $('pauseBtn').disabled = true; $('stopBtn').textContent = 'RIDE SAVED'; });
+    setInterval(() => { if (!state.paused) $('duration').textContent = formatDuration(Date.now() - state.startedAt); }, 1000);
+    listCameras();
+  </script>
+</body>
+</html>
