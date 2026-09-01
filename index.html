@@ -49,6 +49,11 @@
     .map { position: relative; min-height: 372px; overflow: hidden; background-color: #121a20; background-image: linear-gradient(30deg, transparent 47%, rgba(96,229,225,.13) 48%, transparent 49%), linear-gradient(150deg, transparent 47%, rgba(186,255,53,.08) 48%, transparent 49%), linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px); background-size: 118px 118px, 154px 154px, 36px 36px, 36px 36px; }
     .map:before { content: ''; position: absolute; inset: 14% -14% 20% 22%; border: 3px solid var(--acid); border-left-color: transparent; border-radius: 48% 65% 35% 56%; transform: rotate(-24deg); box-shadow: 0 0 18px rgba(186,255,53,.65), 0 0 48px rgba(186,255,53,.22); }
     .map:after { content: ''; position: absolute; width: 13px; height: 13px; left: 49%; top: 51%; border: 3px solid var(--ink); background: var(--orange); border-radius: 50%; box-shadow: 0 0 0 6px rgba(255,121,87,.22), 0 0 30px var(--orange); }
+    .map.map-mock { background-color: #e7e9e5; background-image: linear-gradient(24deg, transparent 46%, rgba(255,255,255,.94) 47%, rgba(255,255,255,.94) 53%, transparent 54%), linear-gradient(142deg, transparent 47%, rgba(255,255,255,.94) 48%, rgba(255,255,255,.94) 52%, transparent 53%), linear-gradient(90deg, transparent 47%, rgba(255,255,255,.82) 48%, rgba(255,255,255,.82) 52%, transparent 53%), linear-gradient(rgba(116,136,152,.16) 1px, transparent 1px), linear-gradient(90deg, rgba(116,136,152,.16) 1px, transparent 1px); background-size: 132px 132px, 168px 168px, 90px 90px, 30px 30px, 30px 30px; }
+    .map.map-mock:before { border-color: #2f7eed; border-left-color: transparent; box-shadow: 0 0 0 4px rgba(47,126,237,.2); }
+    .map.map-mock:after { background: #2f7eed; border-color: #fff; box-shadow: 0 0 0 5px rgba(47,126,237,.24); }
+    .map.map-mock .map-label { color: #52616e; font-weight: 500; }
+    .map.map-mock .map-controls .icon-btn { background: rgba(255,255,255,.94); color: #31404c; border-color: rgba(67,86,100,.16); }
     .map-label { position: absolute; color: rgba(244,247,242,.48); font: 10px 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .08em; }
     .map-label.one { left: 13%; top: 28%; } .map-label.two { right: 14%; top: 64%; } .map-label.three { left: 61%; top: 22%; }
     .map-controls { position: absolute; right: 14px; bottom: 15px; display: grid; gap: 8px; }
@@ -97,6 +102,19 @@
       .bottom-row { min-height: 0; grid-column: 1 / -1; gap: 7px; } .action { min-height: 0; height: 46px; border-radius: 12px; font-size: 10px; } .bottom-row .start { flex: 1 0 100%; } .bottom-row:not(.riding) .pause, .bottom-row:not(.riding) .stop { display: none; } .bottom-row.riding .start { display: none; }
     }
     @media (min-width: 761px) { .camera-card { grid-column: 2; grid-row: 1; } .map-card { grid-column: 1; grid-row: 1; } }
+    @media (orientation: landscape) and (max-height: 900px) {
+      html, body { height: 100%; overflow: hidden; }
+      body { padding: max(5px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(5px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)); }
+      .app-shell { height: 100dvh; display: grid; grid-template-rows: 25px minmax(0, 1fr); max-width: none; } .brand-mark { width: 17px; height: 17px; font-size: 9px; } .brand-name { font-size: 9px; } .ride-state { font-size: 8px; }
+      .dashboard { grid-template-columns: 1.16fr 1.03fr .91fr; grid-template-rows: minmax(0, 1fr) 37px; gap: 6px; }
+      .map-card { grid-column: 1; grid-row: 1; grid-template-rows: 26px minmax(0, 1fr); } .map-card .card-head { min-height: 26px; }
+      .camera-card { grid-column: 2; grid-row: 1; }
+      .metrics { grid-column: 3; grid-row: 1; grid-template-columns: 1fr 1fr; grid-template-rows: 1.15fr 1fr 1fr; gap: 5px; }
+      .metric { padding: 7px; border-radius: 10px; } .metric.primary { grid-column: 1 / -1; grid-row: auto; } .metric.primary .value { font-size: clamp(29px, 5vw, 39px); } .metric.primary .unit { font-size: 10px; } .metric .label { font-size: 7px; } .metric .value { margin-top: 5px; font-size: 14px; } .metric .unit, .status { font-size: 7px; } .status { margin-top: 2px; }
+      .turn { padding: 6px; } .turn-arrow { width: 23px; height: 23px; font-size: 14px; } .turn-copy b { font-size: 9px; } .turn-copy small { font-size: 8px; } .map-label { font-size: 6px; }
+      .camera-placeholder strong { font-size: 12px; } .camera-placeholder p { font-size: 8px; } .preview-btn { font-size: 8px; padding: 6px 8px; } .alert { font-size: 8px; } .camera-title, .rec { font-size: 8px; }
+      .bottom-row { grid-column: 1 / -1; grid-row: 2; gap: 6px; } .action { height: 37px; border-radius: 10px; font-size: 9px; } .bottom-row .start { flex: 1 0 100%; } .bottom-row:not(.riding) .pause, .bottom-row:not(.riding) .stop { display: none; } .bottom-row.riding .start { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -109,7 +127,7 @@
     <section class="dashboard" aria-label="Cycling ride dashboard">
       <article class="card map-card">
         <div class="card-head"><span class="eyebrow">01 / route guidance</span><span class="pill"><strong id="gpsPill">DEMO GPS</strong></span></div>
-        <div class="map" aria-label="Illustrated route map">
+        <div class="map map-mock" aria-label="Illustrated map preview">
           <div class="turn"><div class="turn-arrow">↗</div><div class="turn-copy"><b>Turn right on Oak St</b><small>in 200 meters</small></div></div>
           <span class="map-label one">Riverside way</span><span class="map-label two">Oak street</span><span class="map-label three">North loop</span>
           <div class="map-controls"><button class="icon-btn" id="locateBtn" aria-label="Use current location">⌖</button><button class="icon-btn" aria-label="Zoom in">+</button></div>
